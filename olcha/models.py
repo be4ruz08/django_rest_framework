@@ -1,5 +1,6 @@
 from typing import Any
 from django.db import models
+from django.db.models import Avg
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 
@@ -38,11 +39,14 @@ class Category(BaseModel):
 
 class Group(BaseModel):
     title = models.CharField(max_length=90, unique=True)
-    slug = models.SlugField(blank=True)
+    slug = models.SlugField(null=True, blank=True)
     image = models.ImageField(upload_to='media/images/group/')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='groups')
 
     objects = models.Manager()
+
+    def __str__(self):
+        return self.title
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
@@ -53,14 +57,12 @@ class Product(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(blank=True)
     description = models.TextField()
-    price = models.DecimalField(max_digits=7, decimal_places=2)
+    price = models.FloatField()
     discount = models.IntegerField(default=0)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     is_liked = models.ManyToManyField(User, related_name='liked_products', blank=True)
 
     objects = models.Manager()
-
-
 
     @property
     def discounted_price(self) -> Any:
@@ -68,9 +70,20 @@ class Product(BaseModel):
             return self.price * (1 - (self.discount / 100.0))
         return self.price
 
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
+    @property
+    def average_rating(self):
+        avg_rating = self.comment_set.aggregate(Avg('rating'))['rating__avg']
+        return avg_rating or 0
+
+    @property
+    def primary_image(self):
+        primary_image = self.image_set.filter(is_primary=True).first()
+        if primary_image:
+            return primary_image.image.url
+        return None
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         ordering = ['-created_at']

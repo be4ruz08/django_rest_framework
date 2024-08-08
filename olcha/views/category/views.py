@@ -11,7 +11,7 @@ from olcha.models import Category
 class CategoryListApiView(APIView):
     def get(self, request):
         categories = Category.objects.all()
-        serializer = CategoryModelSerializer(categories, many=True)
+        serializer = CategoryModelSerializer(categories, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -27,7 +27,7 @@ class CategoryCreateApiView(APIView):
         serializer = CategoryModelSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response('Product Successfully Created', status=status.HTTP_201_CREATED)
+            return Response('Category Successfully Created', status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -65,3 +65,4 @@ class CategoryDeleteApiView(APIView):
                 'status': 200
             }
             return Response(data)
+
