@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from olcha.models import Category, Group, Product
+from olcha.models import Category, Group, Product, Image, Comment
 
 # Register your models here.
 
@@ -21,3 +21,12 @@ class CategoryModelAdmin(admin.ModelAdmin):
 class CategoryModelAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('message', 'rating', 'created_at')
+    search_fields = ('message',)
+    list_filter = ('rating', 'created_at')
+
+
+admin.site.register(Image)

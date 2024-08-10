@@ -70,18 +70,6 @@ class Product(BaseModel):
             return self.price * (1 - (self.discount / 100.0))
         return self.price
 
-    @property
-    def average_rating(self):
-        avg_rating = self.comment_set.aggregate(Avg('rating'))['rating__avg']
-        return avg_rating or 0
-
-    @property
-    def primary_image(self):
-        primary_image = self.image_set.filter(is_primary=True).first()
-        if primary_image:
-            return primary_image.image.url
-        return None
-
     def __str__(self):
         return self.name
 
@@ -91,7 +79,7 @@ class Product(BaseModel):
 
 class Image(BaseModel):
     image = models.ImageField(upload_to='media/images/products/')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     is_primary = models.BooleanField(default=False)
 
     def __str__(self):
@@ -109,7 +97,10 @@ class Comment(BaseModel):
     message = models.TextField()
     rating = models.IntegerField(choices=Rating.choices, default=Rating.One.value)
     file = models.FileField(upload_to='comments/')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
+
+    def __str__(self):
+        return self.message
 
 
 class Key(BaseModel):
@@ -123,4 +114,4 @@ class Value(BaseModel):
 class Attribute(models.Model):
     key = models.ForeignKey(Key, on_delete=models.CASCADE)
     value = models.ForeignKey(Value, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='attributes')

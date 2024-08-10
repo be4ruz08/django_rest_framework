@@ -1,8 +1,8 @@
 from rest_framework import generics
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from olcha.models import Product
-from olcha.serializers import ProductModelSerializer
+from olcha.models import Product, Attribute
+from olcha.serializers import ProductModelSerializer, AttributeSerializer
 
 
 class ProductCreateAPIView(generics.CreateAPIView):
@@ -23,5 +23,18 @@ class ProductListAPIView(ListAPIView):
             queryset = Product.objects.all()
 
         return queryset
+
+
+class ProductAttributeListAPIView(ListAPIView):
+    serializer_class = AttributeSerializer
+
+    def get_queryset(self):
+        slug = self.kwargs.get('slug')
+        return Attribute.objects.filter(product__slug=slug).select_related('key', 'value')
+
+
+class ProductDetailAPIView(RetrieveAPIView):
+    serializer_class = ProductModelSerializer
+    queryset = Product.objects.all()
 
 

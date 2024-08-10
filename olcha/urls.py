@@ -23,4 +23,8 @@ urlpatterns = [
     path('products/', p_views.ProductListAPIView.as_view(), name='product-list'),
     # path('category/<slug:category_slug>/<slug:group_slug>/', p_views.ProductListAPIView.as_view(), name='product-list'),
 
+    # Attributes urls
+
+    path('products/<slug:slug>/attributes/', p_views.ProductAttributeListAPIView.as_view(), name='product-attributes'),
+
 ]
