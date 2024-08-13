@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
+
 from olcha.views.category import views as c_views
 from olcha.views.group import views as g_views
 from olcha.views.product import views as p_views
+from olcha.views.auth import views as auth_views
 
 urlpatterns = [
 
@@ -20,11 +22,18 @@ urlpatterns = [
 
     # Product urls
     path('product/create/', p_views.ProductCreateAPIView.as_view(), name='product-create'),
-    path('products/', p_views.ProductListAPIView.as_view(), name='product-list'),
-    # path('category/<slug:category_slug>/<slug:group_slug>/', p_views.ProductListAPIView.as_view(), name='product-list'),
+    # path('products/', p_views.ProductListAPIView.as_view(), name='product-list'),
+    path('category/<slug:category_slug>/<slug:group_slug>/', p_views.ProductListAPIView.as_view(), name='product-list'),
+    path('product/view/<slug:slug>/', p_views.ProductDetailAPIView.as_view()),
 
     # Attributes urls
 
     path('products/<slug:slug>/attributes/', p_views.ProductAttributeListAPIView.as_view(), name='product-attributes'),
+
+    # Authentication
+
+    path('login-page/', auth_views.LoginAPIView.as_view()),
+    path('logout-page/', auth_views.LogoutAPIView.as_view()),
+    path('register-page/', auth_views.RegisterAPIView.as_view()),
 
 ]

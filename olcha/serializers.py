@@ -1,4 +1,7 @@
 from django.db.models import Avg
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from olcha.models import Category, Group, Product, Image, Attribute
@@ -97,3 +100,50 @@ class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
         fields = ['key', 'value']
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100, required=True)
+    password = serializers.CharField(max_length=100, required=True)
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=100, required=True)
+    first_name = serializers.CharField(max_length=125, required=False)
+    last_name = serializers.CharField(max_length=125, required=False)
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=255, required=True)
+    password2 = serializers.CharField(max_length=255, required=True)
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def validate_username(self, username):
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({
+                "data": f"This {username} username is already taken."
+            })
+        return username
+
+    def validate(self, instance):
+        if instance['password'] != instance['password2']:
+            data = {
+                'error': 'Passwords do not match'
+            }
+            raise serializers.ValidationError(detail=data)
+
+        if User.objects.filter(email=instance['email']).exists():
+            raise ValidationError({"message": "Email already taken!"})
+        return instance
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        password2 = validated_data.pop('password2')
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
+        Token.objects.create(user=user)
+        return user
+

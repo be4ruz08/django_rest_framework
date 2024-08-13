@@ -3,6 +3,9 @@ from django.db import models
 from django.db.models import Avg
 from django.utils.text import slugify
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.response import Response
 
 
 class BaseModel(models.Model):
@@ -115,3 +118,18 @@ class Attribute(models.Model):
     key = models.ForeignKey(Key, on_delete=models.CASCADE)
     value = models.ForeignKey(Value, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='attributes')
+
+
+class CustomAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })

@@ -1,5 +1,7 @@
 from rest_framework import generics
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from olcha.models import Product, Attribute
 from olcha.serializers import ProductModelSerializer, AttributeSerializer
@@ -12,16 +14,14 @@ class ProductCreateAPIView(generics.CreateAPIView):
 
 class ProductListAPIView(ListAPIView):
     serializer_class = ProductModelSerializer
+    queryset = Product.objects.all()
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
         category_slug = self.kwargs.get('category_slug')
         group_slug = self.kwargs.get('group_slug')
-
-        if category_slug and group_slug:
-            queryset = Product.objects.filter(group__category__slug=category_slug, group__slug=group_slug)
-        else:
-            queryset = Product.objects.all()
-
+        queryset = Product.objects.filter(group__category__slug=category_slug, group__slug=group_slug)
         return queryset
 
 
