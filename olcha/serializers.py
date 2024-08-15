@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from olcha.models import Category, Group, Product, Image, Attribute
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class CategoryModelSerializer(ModelSerializer):
@@ -112,38 +113,23 @@ class RegisterSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=125, required=False)
     last_name = serializers.CharField(max_length=125, required=False)
     email = serializers.EmailField()
-    password = serializers.CharField(max_length=255, required=True)
-    password2 = serializers.CharField(max_length=255, required=True)
+    password = serializers.CharField(max_length=255, write_only=True)
+    password2 = serializers.CharField(max_length=255, write_only=True)
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'password2']
 
-    def validate_username(self, username):
-
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({
-                "data": f"This {username} username is already taken."
-            })
-        return username
-
-    def validate(self, instance):
-        if instance['password'] != instance['password2']:
-            data = {
-                'error': 'Passwords do not match'
-            }
-            raise serializers.ValidationError(detail=data)
-
-        if User.objects.filter(email=instance['email']).exists():
-            raise ValidationError({"message": "Email already taken!"})
-        return instance
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError("Passwords do not match")
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError("Email already taken")
+        return data
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
-        password2 = validated_data.pop('password2')
-        user = User.objects.create(**validated_data)
-        user.set_password(password)
-        user.save()
-        Token.objects.create(user=user)
+        validated_data.pop('password2')
+        user = User.objects.create_user(**validated_data)
         return user
+
 

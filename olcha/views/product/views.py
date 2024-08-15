@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from olcha.models import Product, Attribute
 from olcha.serializers import ProductModelSerializer, AttributeSerializer
 
@@ -16,7 +16,7 @@ class ProductListAPIView(ListAPIView):
     serializer_class = ProductModelSerializer
     queryset = Product.objects.all()
     permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         category_slug = self.kwargs.get('category_slug')

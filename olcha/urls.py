@@ -31,9 +31,9 @@ urlpatterns = [
     path('products/<slug:slug>/attributes/', p_views.ProductAttributeListAPIView.as_view(), name='product-attributes'),
 
     # Authentication
-
-    path('login-page/', auth_views.LoginAPIView.as_view()),
-    path('logout-page/', auth_views.LogoutAPIView.as_view()),
-    path('register-page/', auth_views.RegisterAPIView.as_view()),
+    #
+    # path('login-page/', auth_views.LoginAPIView.as_view()),
+    # path('logout-page/', auth_views.LogoutAPIView.as_view()),
+    # path('register-page/', auth_views.RegisterAPIView.as_view()),
 
 ]
