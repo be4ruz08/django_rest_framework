@@ -34,6 +34,7 @@ from root.custom_obtain_views import LogoutApiView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('olcha-uz/', include('olcha.urls')),
+    path('post/', include('post.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('api-token-auth/', custom_token.CustomAuthToken.as_view()),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -41,3 +42,4 @@ urlpatterns = [
     path('api/register/', RegisterAPIView.as_view(), name='register'),
     path('logout-page/', LogoutApiView.as_view()),
     ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

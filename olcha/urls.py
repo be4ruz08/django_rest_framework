@@ -24,7 +24,8 @@ urlpatterns = [
     path('product/create/', p_views.ProductCreateAPIView.as_view(), name='product-create'),
     # path('products/', p_views.ProductListAPIView.as_view(), name='product-list'),
     path('category/<slug:category_slug>/<slug:group_slug>/', p_views.ProductListAPIView.as_view(), name='product-list'),
-    path('product/view/<slug:slug>/', p_views.ProductDetailAPIView.as_view()),
+    path('product/view/<slug:slug>/', p_views.ProductDetailAPIView.as_view(), name='product-detail'),
+
 
     # Attributes urls
 

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'olcha',
+    'post',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -137,13 +138,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'root.settings')
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.AllowAny',
     ),
 }
-

@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from olcha.models import Product, Attribute
 from olcha.serializers import ProductModelSerializer, AttributeSerializer
+from rest_framework import viewsets
+from olcha.permissions import CustomPermission
 
 
 class ProductCreateAPIView(generics.CreateAPIView):
@@ -34,7 +36,10 @@ class ProductAttributeListAPIView(ListAPIView):
 
 
 class ProductDetailAPIView(RetrieveAPIView):
-    serializer_class = ProductModelSerializer
     queryset = Product.objects.all()
+    serializer_class = ProductModelSerializer
+    permission_classes = [CustomPermission]
+    lookup_field = 'slug'
+
 
 
