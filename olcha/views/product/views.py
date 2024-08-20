@@ -16,14 +16,15 @@ class ProductCreateAPIView(generics.CreateAPIView):
 
 class ProductListAPIView(ListAPIView):
     serializer_class = ProductModelSerializer
-    queryset = Product.objects.all()
-    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
         category_slug = self.kwargs.get('category_slug')
         group_slug = self.kwargs.get('group_slug')
-        queryset = Product.objects.filter(group__category__slug=category_slug, group__slug=group_slug)
+        queryset = Product.objects.filter(
+            group__category__slug=category_slug,
+            group__slug=group_slug
+        ).select_related('group__category')
         return queryset
 
 
@@ -32,11 +33,13 @@ class ProductAttributeListAPIView(ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs.get('slug')
-        return Attribute.objects.filter(product__slug=slug).select_related('key', 'value')
+        return Attribute.objects.filter(
+            product__slug=slug
+        ).select_related('key', 'value')
 
 
 class ProductDetailAPIView(RetrieveAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('group')
     serializer_class = ProductModelSerializer
     permission_classes = [CustomPermission]
     lookup_field = 'slug'

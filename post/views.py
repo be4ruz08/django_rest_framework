@@ -5,7 +5,8 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.generics import ListAPIView
 from post.models import Post
 from post.serializers import PostSerializer
 from post import permissions as custom_permissions
@@ -75,10 +76,14 @@ from post import permissions as custom_permissions
 #     queryset = Post.objects.all()
 
 
-class PostCreateAPIView(ListCreateAPIView):
+class PostListAPIView(ListCreateAPIView):
     permission_classes = [custom_permissions.CustomPermission ]
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+
+    def get_queryset(self):
+        queryset = Post.objects.select_related('author').prefetch_related('tags')
+        return queryset
 
 
 class PostDetail(RetrieveUpdateDestroyAPIView):
@@ -86,6 +91,5 @@ class PostDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     lookup_field = 'pk'
-
 
 

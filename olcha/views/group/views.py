@@ -12,8 +12,7 @@ class GroupCreateAPIView(generics.CreateAPIView):
 
 
 class GroupListAPIView(generics.ListAPIView):
-    # permission_classes = [IsAuthenticated]
-    queryset = Group.objects.all()
+    queryset = Group.objects.select_related('category')
     serializer_class = GroupModelSerializer
 
 
@@ -25,6 +24,7 @@ class GroupListAPIView(generics.ListAPIView):
 
 
 class GroupDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Group.objects.all()
+    queryset = Group.objects.select_related('category')
     serializer_class = GroupModelSerializer
     lookup_field = 'slug'
+

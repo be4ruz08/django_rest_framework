@@ -14,6 +14,6 @@ from post import views
 # ] + router.urls
 
 urlpatterns = [
-    path('post-list/', views.PostCreateAPIView.as_view()),
+    path('post-list/', views.PostListAPIView.as_view()),
     path('post-list/<int:pk>', views.PostDetail.as_view())
 ]
