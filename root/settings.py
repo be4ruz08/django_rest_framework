@@ -163,10 +163,17 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.sql.SQLPanel',
-]
+# DEBUG_TOOLBAR_PANELS = [
+#     'debug_toolbar.panels.sql.SQLPanel',
+# ]
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_COLLAPSED': True,
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "127.0.0.1:11211",
+    }
 }

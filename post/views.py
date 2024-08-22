@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import permissions
@@ -10,6 +12,7 @@ from rest_framework.generics import ListAPIView
 from post.models import Post
 from post.serializers import PostSerializer
 from post import permissions as custom_permissions
+from django.core.cache import cache
 
 # Create your views here.
 
@@ -81,15 +84,35 @@ class PostListAPIView(ListCreateAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
+    @method_decorator(cache_page(60))
+    def get(self, *args, **kwargs):
+        return super().get(*args, **kwargs)
+
     def get_queryset(self):
         queryset = Post.objects.select_related('author').prefetch_related('tags')
         return queryset
 
 
-class PostDetail(RetrieveUpdateDestroyAPIView):
-    permission_classes = [custom_permissions.CustomPermission ]
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-    lookup_field = 'pk'
+# class PostDetail(RetrieveUpdateDestroyAPIView):
+#     permission_classes = [custom_permissions.CustomPermission]
+#     serializer_class = PostSerializer
+#     queryset = Post.objects.all()
+#     lookup_field = 'pk'
+
+class PostDetailAPIView(APIView, PageNumberPagination):
+    def get(self, request, *args, **kwargs):
+        product_id = kwargs.get('pk')
+        cache_key = f'post_detail_{product_id}'
+        post = cache.get(cache_key)
+
+        if post is None:
+            try:
+                post_obj = Post.objects.get(pk=product_id)
+                post = PostSerializer(post_obj).data
+                cache.set(cache_key, post, timeout=60 * 3)
+            except Post.DoesNotExist:
+                return Response({'detail': 'Not found.'}, status=404)
+
+        return Response(post)
 
 
