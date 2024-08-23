@@ -1,16 +1,14 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.core.cache import cache
-from .models import Post
+from post.models import Post
 
 
 @receiver(post_save, sender=Post)
-@receiver(post_delete, sender=Post)
-def clear_post_cache(sender, instance, **kwargs):
-    cache_key = f'post_detail_{instance.pk}'
-    cache.delete(cache_key)
-
-
-@receiver(post_delete, sender=Post)
-def post_deleted_signal(sender, instance, **kwargs):
-    print("Post is Deleted")
+@receiver(pre_save, sender=Post)
+def clear_cache_post_data(sender, instance, **kwargs):
+    cache.delete('post_list')
+    print('Post List cache Deleted')
+    post_id = instance.pk
+    cache.delete(f'post_detail_{post_id}')
+    print('Post Detail cache Deleted')

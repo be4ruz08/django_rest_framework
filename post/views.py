@@ -79,40 +79,36 @@ from django.core.cache import cache
 #     queryset = Post.objects.all()
 
 
-class PostListAPIView(ListCreateAPIView):
-    permission_classes = [custom_permissions.CustomPermission ]
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
+class PostAPIView(APIView, PageNumberPagination):
+    permission_classes = [permissions.AllowAny]
+    page_size = 100
 
-    @method_decorator(cache_page(60))
-    def get(self, *args, **kwargs):
-        return super().get(*args, **kwargs)
-
-    def get_queryset(self):
-        queryset = Post.objects.select_related('author').prefetch_related('tags')
-        return queryset
-
-
-# class PostDetail(RetrieveUpdateDestroyAPIView):
-#     permission_classes = [custom_permissions.CustomPermission]
-#     serializer_class = PostSerializer
-#     queryset = Post.objects.all()
-#     lookup_field = 'pk'
-
-class PostDetailAPIView(APIView, PageNumberPagination):
     def get(self, request, *args, **kwargs):
-        product_id = kwargs.get('pk')
-        cache_key = f'post_detail_{product_id}'
+        cache_key = 'post_list'
+        posts = cache.get(cache_key)
+        if posts is None:
+            posts = Post.objects.all()
+            results = self.paginate_queryset(posts, request, view=self)
+
+            serializer = PostSerializer(results, many=True)
+            cache.set(cache_key, serializer.data, timeout=60 * 5)
+            return self.get_paginated_response(serializer.data)
+        return Response(posts)
+
+
+class PostDetailAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        post_id = kwargs.get('pk')
+        cache_key = f'post_detail_{post_id}'
         post = cache.get(cache_key)
 
         if post is None:
             try:
-                post_obj = Post.objects.get(pk=product_id)
+                post_obj = Post.objects.get(id=post_id)
                 post = PostSerializer(post_obj).data
                 cache.set(cache_key, post, timeout=60 * 3)
             except Post.DoesNotExist:
                 return Response({'detail': 'Not found.'}, status=404)
 
         return Response(post)
-
-
+    
